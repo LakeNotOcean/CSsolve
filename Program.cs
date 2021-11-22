@@ -10,7 +10,7 @@ namespace CSsolve
             // инициализация начальных условий
             double x0 = 0.5, y0 = 0.5, r0 = 0.2;
             double x1 = 1.2, y1 = 1.2, r1 = 0.1;
-            double hArg = 0.01, tArg = 0.002, timeValue = 2, sideSize = 2;
+            double hArg = 0.01, tArg = 0.002, timeValue = 4, sideSize = 2;
             //Функция Хевисайда
             Func<double, double, double> beginFunc = (x, y) =>
             {

@@ -16,22 +16,14 @@ namespace CSsolve
             var u = new double[N, N, T];
             var x = Generate.LinearSpaced(N, 0, sideSize);
             var y = Generate.LinearSpaced(N, 0, sideSize);
-            Parallel.For(1, N - 1, (i) =>
+            Parallel.For(0, N, (i) =>
               {
-                  for (int j = 1; j < N - 1; ++j)
+                  for (int j = 0; j < N; ++j)
                   {
                       u[i, j, 0] = calc(x[i], y[j]);
-                      u[i, j, 1] = u[i, j, 0] + tArg * tArg / (2 * hArg * hArg) *
-                      (u[i + 1, j, 0] + u[i - 1, j, 0] + u[i, j - 1, 0] - 4 * u[i, j, 1]);
+                      u[i, j, 1] = (1 - tArg * tArg / 2) * u[i, j, 0];
                   }
-                  u[i, 0, 1] = 4 / 3 * u[i, 1, 1] - 1 / 3 * u[i, 2, 1];
-                  u[i, N - 1, 1] = 4 / 3 * u[i, N - 2, 1] - 1 / 3 * u[i, N - 3, 1];
               });
-            Parallel.For(1, N - 1, (j) =>
-                  {
-                      u[0, j, 1] = 4 / 3 * u[1, j, 1] - 1 / 3 * u[2, j, 1];
-                      u[N - 1, j, 1] = 4 / 3 * u[N - 2, j, 1] - 1 / 3 * u[N - 3, j, 1];
-                  });
             return parallelCrossWithBound(u, N, T, tArg, hArg);
 
         }
@@ -104,13 +96,17 @@ namespace CSsolve
                           u[i, j, k] = tArg * tArg / (hArg * hArg) * (u[i + 1, j, k - 1] + u[i, j + 1, k - 1] - 4 * u[i, j, k - 1] + u[i - 1, j, k - 1] + u[i, j - 1, k - 1])
                               + 2 * u[i, j, k - 1] - u[i, j, k - 2];
                       }
-                      u[i, 0, k] = 4 / 3 * u[i, 1, k] - 1 / 3 * u[i, 2, k];
-                      u[i, N - 1, k] = 4 / 3 * u[i, N - 2, k] - 1 / 3 * u[i, N - 3, k];
+                      u[i, 0, k] = tArg * tArg / (hArg * hArg) * (u[i + 1, 0, k - 1] - 4 * u[i, 0, k - 1] + u[i - 1, 0, k - 1] + 2 * u[i, 1, k - 1])
+                      + 2 * u[i, 0, k - 1] - u[i, 0, k - 2];
+                      u[i, N - 1, k] = tArg * tArg / (hArg * hArg) * (u[i + 1, N - 1, k - 1] - 4 * u[i, N - 1, k - 1] + u[i - 1, N - 1, k - 1] + 2 * u[i, N - 2, k - 1])
+                      + 2 * u[i, N - 1, k - 1] - u[i, N - 1, k - 2];
                   });
                 Parallel.For(1, N - 1, (j) =>
                   {
-                      u[0, j, k] = 4 / 3 * u[1, j, k] - 1 / 3 * u[2, j, k];
-                      u[N - 1, j, k] = 4 / 3 * u[N - 2, j, k] - 1 / 3 * u[N - 3, j, k];
+                      u[0, j, k] = tArg * tArg / (hArg * hArg) * (u[0, j + 1, k - 1] - 4 * u[0, j, k - 1] + u[0, j - 1, k - 1] + 2 * u[0, j, k - 1])
+                      + 2 * u[0, j, k - 1] - u[0, j, k - 2];
+                      u[N - 1, j, k] = tArg * tArg / (hArg * hArg) * (u[N - 1, j + 1, k - 1] - 4 * u[N - 1, j, k - 1] + u[N - 1, j - 1, k - 1] + 2 * u[N - 2, j, k - 1])
+                      + 2 * u[N - 1, j, k - 1] - u[N - 1, j, k - 2];
                   });
             }
             return u;
